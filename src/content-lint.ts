@@ -1,0 +1,187 @@
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
+import { LintIssue } from './types/issues';
+import { ContentRuleSet, ContentTarget, RuleDefinition } from './types/rules';
+
+type ExtractedSubject = {
+    readonly type: ContentTarget;
+    readonly name: string;
+};
+
+/**
+ * Run content-based naming lint for a file.
+ *
+ * @param filePath - Candidate file path.
+ * @param contentRuleSets - Configured content rule sets.
+ * @returns List of content-based lint issues.
+ */
+export async function lintFileContent(filePath: string, contentRuleSets: readonly ContentRuleSet[]): Promise<LintIssue[]> {
+    const extension = path.extname(filePath);
+    const matchingRuleSets = contentRuleSets.filter((ruleSet) => ruleSet.extension === '*' || ruleSet.extension === extension);
+
+    if (matchingRuleSets.length === 0) {
+        return [];
+    }
+
+    const fileContent = await fs.readFile(filePath, { encoding: 'utf-8' });
+    const extractedSubjects = extractSubjects(extension, fileContent);
+
+    if (extractedSubjects.length === 0) {
+        return [];
+    }
+
+    const issues: LintIssue[] = [];
+
+    for (const subject of extractedSubjects) {
+        const targetRuleSets = matchingRuleSets.filter((ruleSet) => ruleSet.target === subject.type);
+        if (targetRuleSets.length === 0) {
+            continue;
+        }
+
+        const allRules = targetRuleSets.flatMap((ruleSet) => ruleSet.groups.all ?? []);
+        const anyRules = targetRuleSets.flatMap((ruleSet) => ruleSet.groups.any ?? []);
+
+        if (allRules.length > 0) {
+            issues.push(...evaluateAllRules(filePath, extension, subject, allRules));
+        }
+
+        if (anyRules.length > 0) {
+            issues.push(...evaluateAnyRules(filePath, extension, subject, anyRules));
+        }
+    }
+
+    return issues;
+}
+
+function extractSubjects(extension: string, fileContent: string): ExtractedSubject[] {
+    if (extension === '.hdbtable') {
+        return extractTableFields(fileContent);
+    }
+
+    if (extension === '.hdbprocedure' || extension === '.hdbfunction') {
+        return extractProcedureFunctionParameters(fileContent);
+    }
+
+    return [];
+}
+
+function extractTableFields(fileContent: string): ExtractedSubject[] {
+    const subjects: ExtractedSubject[] = [];
+    const seen = new Set<string>();
+    const lines = fileContent.split(/\r?\n/);
+    const skipKeywords = new Set(['PRIMARY', 'CONSTRAINT', 'UNIQUE', 'FOREIGN', 'CHECK', 'PARTITION', 'INDEX', 'KEY']);
+
+    for (const line of lines) {
+        const trimmedLine = line.trim();
+        if (trimmedLine.length === 0 || trimmedLine.startsWith('--')) {
+            continue;
+        }
+
+        const unquotedMatch = trimmedLine.match(/^([A-Za-z_][A-Za-z0-9_]*)\s+[A-Za-z]/);
+        if (unquotedMatch) {
+            const candidate = unquotedMatch[1];
+            if (!candidate) {
+                continue;
+            }
+
+            if (!skipKeywords.has(candidate.toUpperCase()) && !seen.has(candidate)) {
+                seen.add(candidate);
+                subjects.push({ type: 'field', name: candidate });
+            }
+            continue;
+        }
+
+        const quotedMatch = trimmedLine.match(/^"([A-Za-z_][A-Za-z0-9_]*)"\s+[A-Za-z]/);
+        if (quotedMatch) {
+            const candidate = quotedMatch[1];
+            if (!candidate) {
+                continue;
+            }
+
+            if (!seen.has(candidate)) {
+                seen.add(candidate);
+                subjects.push({ type: 'field', name: candidate });
+            }
+        }
+    }
+
+    return subjects;
+}
+
+function extractProcedureFunctionParameters(fileContent: string): ExtractedSubject[] {
+    const subjects: ExtractedSubject[] = [];
+    const seen = new Set<string>();
+    const parameterRegex = /\b(IN|OUT|INOUT)\s+("?[A-Za-z_][A-Za-z0-9_]*"?)\s+[A-Za-z]/gi;
+
+    let match = parameterRegex.exec(fileContent);
+    while (match) {
+        const mode = match[1];
+        const rawName = match[2];
+
+        if (!mode || !rawName) {
+            match = parameterRegex.exec(fileContent);
+            continue;
+        }
+
+        const normalizedMode = mode.toUpperCase();
+        const normalizedName = rawName.replace(/^"|"$/g, '');
+
+        if ((normalizedMode === 'IN' || normalizedMode === 'INOUT') && !seen.has(`input:${normalizedName}`)) {
+            seen.add(`input:${normalizedName}`);
+            subjects.push({ type: 'inputParameter', name: normalizedName });
+        }
+
+        if ((normalizedMode === 'OUT' || normalizedMode === 'INOUT') && !seen.has(`output:${normalizedName}`)) {
+            seen.add(`output:${normalizedName}`);
+            subjects.push({ type: 'outputParameter', name: normalizedName });
+        }
+
+        match = parameterRegex.exec(fileContent);
+    }
+
+    return subjects;
+}
+
+function evaluateAllRules(filePath: string, extension: string, subject: ExtractedSubject, rules: readonly RuleDefinition[]): LintIssue[] {
+    const issues: LintIssue[] = [];
+
+    for (const rule of rules) {
+        if (!rule.pattern.test(subject.name)) {
+            issues.push({
+                filePath,
+                artifactName: path.parse(filePath).name,
+                extension,
+                subjectType: subject.type,
+                subjectName: subject.name,
+                failedRuleDescription: rule.description,
+                failedPattern: toRegexLiteral(rule)
+            });
+        }
+    }
+
+    return issues;
+}
+
+function evaluateAnyRules(filePath: string, extension: string, subject: ExtractedSubject, rules: readonly RuleDefinition[]): LintIssue[] {
+    const hasAtLeastOneMatch = rules.some((rule) => rule.pattern.test(subject.name));
+
+    if (hasAtLeastOneMatch) {
+        return [];
+    }
+
+    return [
+        {
+            filePath,
+            artifactName: path.parse(filePath).name,
+            extension,
+            subjectType: subject.type,
+            subjectName: subject.name,
+            failedRuleDescription: 'At least one OR-group rule must match: ' + rules.map((rule) => rule.description).join(' | '),
+            failedPattern: rules.map(toRegexLiteral).join(' OR ')
+        }
+    ];
+}
+
+function toRegexLiteral(rule: RuleDefinition): string {
+    return `/${rule.source}/${rule.flags}`;
+}

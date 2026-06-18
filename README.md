@@ -1,5 +1,14 @@
 # hana-linter
 
+[![npm version](https://img.shields.io/npm/v/hana-linter)](https://www.npmjs.com/package/hana-linter)
+[![CI](https://github.com/qualiture/hana-linter/actions/workflows/npm-publish.yml/badge.svg?branch=main)](https://github.com/qualiture/hana-linter/actions/workflows/npm-publish.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/qualiture/hana-linter/blob/main/LICENSE)
+[![Node >=14](https://img.shields.io/badge/node-%3E%3D14-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+
+Regex-first naming lint for SAP HANA artifacts in CAP projects.
+
+[NPM package](https://www.npmjs.com/package/hana-linter) • [Report issue](https://github.com/qualiture/hana-linter/issues) • [Releases](https://github.com/qualiture/hana-linter/releases)
+
 Lint SAP HANA artifact names in CAP projects using configurable regex-based naming rules.
 
 ## Why
@@ -26,6 +35,8 @@ Rule groups per extension:
 
 - `groups.all`: every rule must match (AND)
 - `groups.any`: at least one rule must match (OR)
+
+You can define `extension: "*"` as a shared rule set. Its rules are applied to every file extension and are merged with any extension-specific rule set.
 
 ## Install
 
@@ -112,10 +123,12 @@ Create a `.hana-linter.json` file in your project root.
 - `rootDir` (string): directory to scan in full scan mode
 - `ignoredDirectories` (string[]): folder names ignored during recursive traversal
 - `extensionRuleSets` (array): rule definitions grouped by file extension
+- `contentRuleSets` (optional array): naming rules for identifiers extracted from file contents (for example table fields and procedure/function parameters)
 
 Each `extensionRuleSets` item contains:
 
-- `extension` (string): target extension, for example `.hdbtable`
+- `extension` (string): target extension, for example `.hdbtable`; use `*` to target all extensions
+- `folderName` (optional string): enforce that matching files are located in a folder with this name (at any depth under `rootDir`)
 - `groups.all` (optional array): all rules must match
 - `groups.any` (optional array): at least one rule must match
 
@@ -127,6 +140,21 @@ Each rule contains:
 
 At least one of `groups.all` or `groups.any` must be present for each extension.
 
+When `folderName` is omitted, no folder-location enforcement is applied.
+
+Each `contentRuleSets` item contains:
+
+- `extension` (string): target extension, for example `.hdbtable`; use `*` to target all extensions
+- `target` (string): extracted identifier type to validate; one of `field`, `inputParameter`, `outputParameter`
+- `groups.all` (optional array): all rules must match
+- `groups.any` (optional array): at least one rule must match
+
+Supported extractors in this version:
+
+- `field`: `.hdbtable`
+- `inputParameter`: `.hdbprocedure`, `.hdbfunction`
+- `outputParameter`: `.hdbprocedure`, `.hdbfunction`
+
 ### Default Config Example
 
 ```json
@@ -135,7 +163,7 @@ At least one of `groups.all` or `groups.any` must be present for each extension.
     "ignoredDirectories": ["node_modules", ".git", "gen"],
     "extensionRuleSets": [
         {
-            "extension": ".hdbtable",
+            "extension": "*",
             "groups": {
                 "all": [
                     {
@@ -147,7 +175,13 @@ At least one of `groups.all` or `groups.any` must be present for each extension.
                         "pattern": "^.{1,30}$",
                         "flags": "u"
                     }
-                ],
+                ]
+            }
+        },
+        {
+            "extension": ".hdbtable",
+            "folderName": "tables",
+            "groups": {
                 "any": [
                     {
                         "description": "Prefix T_",
@@ -167,11 +201,44 @@ At least one of `groups.all` or `groups.any` must be present for each extension.
                     {
                         "description": "Starts with V_",
                         "pattern": "^V_.+"
-                    },
+                    }
+                ]
+            }
+        }
+    ],
+    "contentRuleSets": [
+        {
+            "extension": ".hdbtable",
+            "target": "field",
+            "groups": {
+                "all": [
                     {
-                        "description": "Case-insensitive example (demo)",
-                        "pattern": "^v_.+",
-                        "flags": "i"
+                        "description": "Field names in uppercase snake case",
+                        "pattern": "^[A-Z0-9]+(?:_[A-Z0-9]+)*$"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbprocedure",
+            "target": "inputParameter",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Input parameters prefixed with IP_",
+                        "pattern": "^IP_[A-Z0-9_]+$"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbprocedure",
+            "target": "outputParameter",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Output parameters prefixed with OP_",
+                        "pattern": "^OP_[A-Z0-9_]+$"
                     }
                 ]
             }

@@ -3,7 +3,7 @@
     "ignoredDirectories": ["node_modules", ".git", "gen"],
     "extensionRuleSets": [
         {
-            "extension": ".hdbtable",
+            "extension": "hdb*",
             "groups": {
                 "all": [
                     {
@@ -15,7 +15,13 @@
                         "pattern": "^.{1,30}$",
                         "flags": "u"
                     }
-                ],
+                ]
+            }
+        },
+        {
+            "extension": ".hdbtable",
+            "folderName": "tables",
+            "groups": {
                 "any": [
                     {
                         "description": "Prefix T_",
@@ -30,16 +36,186 @@
         },
         {
             "extension": ".hdbview",
+            "folderName": "sqlviews",
             "groups": {
                 "all": [
                     {
-                        "description": "Starts with V_",
+                        "description": "Prefix V_",
                         "pattern": "^V_.+"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbfunction",
+            "folderName": "functions",
+            "groups": {
+                "any": [
+                    {
+                        "description": "Prefix TF_",
+                        "pattern": "^TF_.+"
                     },
                     {
-                        "description": "Case-insensitive example (demo)",
-                        "pattern": "^v_.+",
-                        "flags": "i"
+                        "description": "Prefix SF_",
+                        "pattern": "^SF_.+"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbprocedure",
+            "folderName": "procedures",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Prefix PR_",
+                        "pattern": "^PR_.+"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbcalculationview",
+            "folderName": "models",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Prefix CV_",
+                        "pattern": "^CV_.+"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbanalyticalprivilege",
+            "folderName": "authorizations",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Prefix AP_",
+                        "pattern": "^AP_.+"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbrole",
+            "folderName": "roles",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Prefix R_",
+                        "pattern": "^R_.+"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbsequence",
+            "folderName": "sequences",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Prefix S_",
+                        "pattern": "^S_.+"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbtabletype",
+            "folderName": "tabletypes",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Prefix TT_",
+                        "pattern": "^TT_.+"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbconstraint",
+            "folderName": "constraints",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Prefix C_",
+                        "pattern": "^C_.+"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbschedulerjob",
+            "folderName": "jobs",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Prefix J_",
+                        "pattern": "^J_.+"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbindex",
+            "folderName": "indexes",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Prefix IDX_",
+                        "pattern": "^IDX_.+"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbtrigger",
+            "folderName": "triggers",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Prefix TR_",
+                        "pattern": "^TR_.+"
+                    }
+                ]
+            }
+        }
+    ],
+    "contentRuleSets": [
+        {
+            "extension": ".hdbtable",
+            "target": "field",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Field names in uppercase snake case",
+                        "pattern": "^[A-Z0-9]+(?:_[A-Z0-9]+)*$"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbprocedure",
+            "target": "inputParameter",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Input parameters prefixed with IP_",
+                        "pattern": "^IP_[A-Z0-9_]+$"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbprocedure",
+            "target": "outputParameter",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Output parameters prefixed with OP_",
+                        "pattern": "^OP_[A-Z0-9_]+$"
                     }
                 ]
             }
