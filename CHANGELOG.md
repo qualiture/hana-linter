@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 ### 0.2.0
 
+- Fixes npm publish 
+
+### 0.2.0
+
 - Added content-based linting for extracted identifiers (fields, input parameters, output parameters)
 - Added optional `contentRuleSets` configuration section for naming rules on file contents
 - Added support for field naming validation in `.hdbtable` files
