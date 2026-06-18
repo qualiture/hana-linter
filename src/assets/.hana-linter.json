@@ -1,0 +1,48 @@
+{
+    "rootDir": "db",
+    "ignoredDirectories": ["node_modules", ".git", "gen"],
+    "extensionRuleSets": [
+        {
+            "extension": ".hdbtable",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Upper snake case only",
+                        "pattern": "^[A-Z0-9]+(?:_[A-Z0-9]+)*$"
+                    },
+                    {
+                        "description": "Max length 30",
+                        "pattern": "^.{1,30}$",
+                        "flags": "u"
+                    }
+                ],
+                "any": [
+                    {
+                        "description": "Prefix T_",
+                        "pattern": "^T_.+"
+                    },
+                    {
+                        "description": "Prefix TX_",
+                        "pattern": "^TX_.+"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbview",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Starts with V_",
+                        "pattern": "^V_.+"
+                    },
+                    {
+                        "description": "Case-insensitive example (demo)",
+                        "pattern": "^v_.+",
+                        "flags": "i"
+                    }
+                ]
+            }
+        }
+    ]
+}
