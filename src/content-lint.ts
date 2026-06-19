@@ -1,12 +1,8 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { LintIssue } from './types/issues';
-import { ContentRuleSet, ContentTarget, RuleDefinition } from './types/rules';
-
-type ExtractedSubject = {
-    readonly type: ContentTarget;
-    readonly name: string;
-};
+import { ExtractedSubject, LintIssue } from './types/issues';
+import { ContentRuleSet, RuleDefinition } from './types/rules';
+import { extractTableColumns } from './parsers/hdbtable/index';
 
 /**
  * Run content-based naming lint for a file.
@@ -55,7 +51,7 @@ export async function lintFileContent(filePath: string, contentRuleSets: readonl
 
 function extractSubjects(extension: string, fileContent: string): ExtractedSubject[] {
     if (extension === '.hdbtable') {
-        return extractTableFields(fileContent);
+        return extractTableColumns(fileContent);
     }
 
     if (extension === '.hdbprocedure' || extension === '.hdbfunction') {
@@ -63,49 +59,6 @@ function extractSubjects(extension: string, fileContent: string): ExtractedSubje
     }
 
     return [];
-}
-
-function extractTableFields(fileContent: string): ExtractedSubject[] {
-    const subjects: ExtractedSubject[] = [];
-    const seen = new Set<string>();
-    const lines = fileContent.split(/\r?\n/);
-    const skipKeywords = new Set(['PRIMARY', 'CONSTRAINT', 'UNIQUE', 'FOREIGN', 'CHECK', 'PARTITION', 'INDEX', 'KEY']);
-
-    for (const line of lines) {
-        const trimmedLine = line.trim();
-        if (trimmedLine.length === 0 || trimmedLine.startsWith('--')) {
-            continue;
-        }
-
-        const unquotedMatch = trimmedLine.match(/^([A-Za-z_][A-Za-z0-9_]*)\s+[A-Za-z]/);
-        if (unquotedMatch) {
-            const candidate = unquotedMatch[1];
-            if (!candidate) {
-                continue;
-            }
-
-            if (!skipKeywords.has(candidate.toUpperCase()) && !seen.has(candidate)) {
-                seen.add(candidate);
-                subjects.push({ type: 'field', name: candidate });
-            }
-            continue;
-        }
-
-        const quotedMatch = trimmedLine.match(/^"([A-Za-z_][A-Za-z0-9_]*)"\s+[A-Za-z]/);
-        if (quotedMatch) {
-            const candidate = quotedMatch[1];
-            if (!candidate) {
-                continue;
-            }
-
-            if (!seen.has(candidate)) {
-                seen.add(candidate);
-                subjects.push({ type: 'field', name: candidate });
-            }
-        }
-    }
-
-    return subjects;
 }
 
 function extractProcedureFunctionParameters(fileContent: string): ExtractedSubject[] {

@@ -1,3 +1,10 @@
+import type { ContentTarget } from './rules';
+
+export type ExtractedSubject = {
+    readonly type: ContentTarget;
+    readonly name: string;
+};
+
 export type LintIssue = {
     readonly filePath: string;
     readonly artifactName: string;
