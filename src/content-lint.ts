@@ -4,6 +4,7 @@ import { ExtractedSubject, LintIssue } from './types/issues';
 import { ContentRuleSet, RuleDefinition } from './types/rules';
 import { extractTableColumns } from './parsers/hdbtable/index';
 import { extractViewColumns } from './parsers/hdbview/index';
+import { extractProcedureParameters } from './parsers/hdbprocedure/index';
 
 /**
  * Run content-based naming lint for a file.
@@ -59,7 +60,11 @@ function extractSubjects(extension: string, fileContent: string): ExtractedSubje
         return extractViewColumns(fileContent);
     }
 
-    if (extension === '.hdbprocedure' || extension === '.hdbfunction') {
+    if (extension === '.hdbprocedure') {
+        return extractProcedureParameters(fileContent);
+    }
+
+    if (extension === '.hdbfunction') {
         return extractProcedureFunctionParameters(fileContent);
     }
 
