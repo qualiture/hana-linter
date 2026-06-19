@@ -5,6 +5,7 @@ import { ContentRuleSet, RuleDefinition } from './types/rules';
 import { extractTableColumns } from './parsers/hdbtable/index';
 import { extractViewColumns } from './parsers/hdbview/index';
 import { extractProcedureParameters } from './parsers/hdbprocedure/index';
+import { extractFunctionParameters } from './parsers/hdbfunction/index';
 
 /**
  * Run content-based naming lint for a file.
@@ -65,44 +66,10 @@ function extractSubjects(extension: string, fileContent: string): ExtractedSubje
     }
 
     if (extension === '.hdbfunction') {
-        return extractProcedureFunctionParameters(fileContent);
+        return extractFunctionParameters(fileContent);
     }
 
     return [];
-}
-
-function extractProcedureFunctionParameters(fileContent: string): ExtractedSubject[] {
-    const subjects: ExtractedSubject[] = [];
-    const seen = new Set<string>();
-    const parameterRegex = /\b(IN|OUT|INOUT)\s+("?[A-Za-z_][A-Za-z0-9_]*"?)\s+[A-Za-z]/gi;
-
-    let match = parameterRegex.exec(fileContent);
-    while (match) {
-        const mode = match[1];
-        const rawName = match[2];
-
-        if (!mode || !rawName) {
-            match = parameterRegex.exec(fileContent);
-            continue;
-        }
-
-        const normalizedMode = mode.toUpperCase();
-        const normalizedName = rawName.replace(/^"|"$/g, '');
-
-        if ((normalizedMode === 'IN' || normalizedMode === 'INOUT') && !seen.has(`input:${normalizedName}`)) {
-            seen.add(`input:${normalizedName}`);
-            subjects.push({ type: 'inputParameter', name: normalizedName });
-        }
-
-        if ((normalizedMode === 'OUT' || normalizedMode === 'INOUT') && !seen.has(`output:${normalizedName}`)) {
-            seen.add(`output:${normalizedName}`);
-            subjects.push({ type: 'outputParameter', name: normalizedName });
-        }
-
-        match = parameterRegex.exec(fileContent);
-    }
-
-    return subjects;
 }
 
 function evaluateAllRules(filePath: string, extension: string, subject: ExtractedSubject, rules: readonly RuleDefinition[]): LintIssue[] {

@@ -46,23 +46,22 @@ Content-based linting uses [Chevrotain](https://chevrotain.io)-powered lexers an
 
 > **Work in progress.** Not all artifact types have been migrated to the Chevrotain-based parsing infrastructure yet.
 
-| Artifact extension        | Content extractor      | Status             |
-| ------------------------- | ---------------------- | ------------------ |
-| `.hdbtable`               | Chevrotain lexer + CST | ✅ Migrated        |
-| `.hdbview`                | Chevrotain lexer + CST | ✅ Migrated        |
-| `.hdbprocedure`           | Chevrotain lexer + CST | ✅ Migrated        |
-| `.hdbfunction`            | Inline regex           | ⚠️ Needs migration |
-| `.hdbtabletype`           | —                      | ❌ Not implemented |
-| `.hdbcalculationview`     | —                      | ❌ Not implemented |
-| `.hdbanalyticalprivilege` | —                      | ❌ Not implemented |
-| `.hdbrole`                | —                      | ❌ Not implemented |
-| `.hdbsequence`            | —                      | ❌ Not implemented |
-| `.hdbconstraint`          | —                      | ❌ Not implemented |
-| `.hdbschedulerjob`        | —                      | ❌ Not implemented |
-| `.hdbindex`               | —                      | ❌ Not implemented |
-| `.hdbtrigger`             | —                      | ❌ Not implemented |
+| Artifact extension        | Content extractor      | Status                 |
+| ------------------------- | ---------------------- | ---------------------- |
+| `.hdbtable`               | Chevrotain lexer + CST | ✅ Migrated            |
+| `.hdbview`                | Chevrotain lexer + CST | ✅ Migrated            |
+| `.hdbprocedure`           | Chevrotain lexer + CST | ✅ Migrated            |
+| `.hdbfunction`            | Chevrotain lexer + CST | ✅ Migrated            |
+| `.hdbtabletype`           | —                      | ❌ Not yet implemented |
+| `.hdbcalculationview`     | —                      | ❌ Not yet implemented |
+| `.hdbanalyticalprivilege` | —                      | ❌ Not yet implemented |
+| `.hdbrole`                | —                      | ❌ Not yet implemented |
+| `.hdbsequence`            | —                      | ❌ Not yet implemented |
+| `.hdbconstraint`          | —                      | ❌ Not yet implemented |
+| `.hdbschedulerjob`        | —                      | ❌ Not yet implemented |
+| `.hdbindex`               | —                      | ❌ Not yet implemented |
+| `.hdbtrigger`             | —                      | ❌ Not yet implemented |
 
-- **Needs migration**: uses an ad-hoc regex scan, subject to false positives from body keywords, multi-line definitions, and block comments.
 - **Not implemented**: `contentRuleSets` targeting these extensions will silently return no results — no identifiers are extracted and no content issues are raised.
 
 ## Install
@@ -178,12 +177,13 @@ Each `contentRuleSets` item contains:
 
 Supported extractors in this version:
 
-| `target`          | Supported extensions            | Extracted identifiers                          |
-| ----------------- | ------------------------------- | ---------------------------------------------- |
-| `field`           | `.hdbtable`                     | Column names                                   |
-| `field`           | `.hdbview`                      | Column aliases (explicit list or `AS` aliases) |
-| `inputParameter`  | `.hdbprocedure`, `.hdbfunction` | `IN` and `INOUT` parameters                    |
-| `outputParameter` | `.hdbprocedure`, `.hdbfunction` | `OUT` and `INOUT` parameters                   |
+| `target`          | Supported extensions | Extracted identifiers                          |
+| ----------------- | -------------------- | ---------------------------------------------- |
+| `field`           | `.hdbtable`          | Column names                                   |
+| `field`           | `.hdbview`           | Column aliases (explicit list or `AS` aliases) |
+| `inputParameter`  | `.hdbprocedure`      | `IN` and `INOUT` parameters                    |
+| `inputParameter`  | `.hdbfunction`       | `IN` parameters (functions accept `IN` only)   |
+| `outputParameter` | `.hdbprocedure`      | `OUT` and `INOUT` parameters                   |
 
 ### Default Config Example
 

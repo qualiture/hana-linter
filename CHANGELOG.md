@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+### 1.0.2
+
+- Added Chevrotain-based `.hdbfunction` parser; content-linting of function input parameters is now fully reliable
+- The `.hdbfunction` parser isolates the parameter list from the `RETURNS` clause and the function body (`AS BEGIN … END`), eliminating false positives caused by `IN` keywords inside SQL body statements and column names in `RETURNS TABLE (...)` definitions
+- HANA functions accept only `IN` parameters; the new parser correctly produces only `inputParameter` subjects and never emits `outputParameter` entries for `.hdbfunction` files
+- Removed the shared ad-hoc regex extractor (`extractProcedureFunctionParameters`) that was previously used for both `.hdbprocedure` and `.hdbfunction` files
+
+---
+
 ### 1.0.0
 
 - Replaced ad-hoc, line-by-line regex extraction with Chevrotain-based lexer + CST parsers for `.hdbtable`, `.hdbprocedure`, and `.hdbview` files
