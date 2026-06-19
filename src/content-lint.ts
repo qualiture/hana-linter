@@ -3,6 +3,7 @@ import path from 'node:path';
 import { ExtractedSubject, LintIssue } from './types/issues';
 import { ContentRuleSet, RuleDefinition } from './types/rules';
 import { extractTableColumns } from './parsers/hdbtable/index';
+import { extractViewColumns } from './parsers/hdbview/index';
 
 /**
  * Run content-based naming lint for a file.
@@ -52,6 +53,10 @@ export async function lintFileContent(filePath: string, contentRuleSets: readonl
 function extractSubjects(extension: string, fileContent: string): ExtractedSubject[] {
     if (extension === '.hdbtable') {
         return extractTableColumns(fileContent);
+    }
+
+    if (extension === '.hdbview') {
+        return extractViewColumns(fileContent);
     }
 
     if (extension === '.hdbprocedure' || extension === '.hdbfunction') {
