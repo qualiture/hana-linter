@@ -7,6 +7,8 @@
 
 Naming-convention lint for SAP HANA artifacts in CAP projects.
 
+> **⚠️ Work in progress.** This project is under active development. APIs, configuration options, and supported artifact types may change between releases. See [Parser Status](#parser-status) for the current state of content extraction support.
+
 [NPM package](https://www.npmjs.com/package/hana-linter) • [Report issue](https://github.com/qualiture/hana-linter/issues) • [Releases](https://github.com/qualiture/hana-linter/releases)
 
 Lint SAP HANA artifact file names and content identifiers in CAP projects using configurable regex-based naming rules.
@@ -39,6 +41,29 @@ Rule groups per extension:
 You can define `extension: "*"` as a shared rule set. Its rules are applied to every file extension and are merged with any extension-specific rule set.
 
 Content-based linting uses [Chevrotain](https://chevrotain.io)-powered lexers and CST parsers to reliably extract identifiers from HANA artifact files. This approach correctly handles block and line comments, multi-line definitions, quoted identifiers, and HANA-specific DDL constructs — without the false positives and false negatives that ad-hoc regex scanning produces.
+
+## Parser Status
+
+> **Work in progress.** Not all artifact types have been migrated to the Chevrotain-based parsing infrastructure yet.
+
+| Artifact extension        | Content extractor      | Status             |
+| ------------------------- | ---------------------- | ------------------ |
+| `.hdbtable`               | Chevrotain lexer + CST | ✅ Migrated        |
+| `.hdbview`                | Chevrotain lexer + CST | ✅ Migrated        |
+| `.hdbprocedure`           | Chevrotain lexer + CST | ✅ Migrated        |
+| `.hdbfunction`            | Inline regex           | ⚠️ Needs migration |
+| `.hdbtabletype`           | —                      | ❌ Not implemented |
+| `.hdbcalculationview`     | —                      | ❌ Not implemented |
+| `.hdbanalyticalprivilege` | —                      | ❌ Not implemented |
+| `.hdbrole`                | —                      | ❌ Not implemented |
+| `.hdbsequence`            | —                      | ❌ Not implemented |
+| `.hdbconstraint`          | —                      | ❌ Not implemented |
+| `.hdbschedulerjob`        | —                      | ❌ Not implemented |
+| `.hdbindex`               | —                      | ❌ Not implemented |
+| `.hdbtrigger`             | —                      | ❌ Not implemented |
+
+- **Needs migration**: uses an ad-hoc regex scan, subject to false positives from body keywords, multi-line definitions, and block comments.
+- **Not implemented**: `contentRuleSets` targeting these extensions will silently return no results — no identifiers are extracted and no content issues are raised.
 
 ## Install
 
