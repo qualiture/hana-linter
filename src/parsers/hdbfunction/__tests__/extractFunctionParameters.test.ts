@@ -24,8 +24,8 @@ describe('AC-1: IN parameter extraction (scalar function)', () => {
             ) RETURNS NVARCHAR(100) AS BEGIN END
         `;
         expect(extractFunctionParameters(ddl)).toEqual([
-            { type: 'inputParameter', name: 'IV_CUSTOMER_ID' },
-            { type: 'inputParameter', name: 'IV_DATE' }
+            { type: 'inputParameter', name: 'IV_CUSTOMER_ID', lineNumber: 3 },
+            { type: 'inputParameter', name: 'IV_DATE', lineNumber: 4 }
         ]);
     });
 
@@ -52,7 +52,7 @@ describe('AC-2: IN parameter extraction (table function)', () => {
                 IN IV_STATUS NVARCHAR(1)
             ) RETURNS TABLE (ID INTEGER, NAME NVARCHAR(100)) AS BEGIN END
         `;
-        expect(extractFunctionParameters(ddl)).toEqual([{ type: 'inputParameter', name: 'IV_STATUS' }]);
+        expect(extractFunctionParameters(ddl)).toEqual([{ type: 'inputParameter', name: 'IV_STATUS', lineNumber: 3 }]);
     });
 
     it('does not produce outputParameter entries for a table function', () => {
@@ -128,7 +128,7 @@ describe('AC-5: TABLE-type IN parameter columns not extracted', () => {
             ) RETURNS INTEGER AS BEGIN END
         `;
         const result = extractFunctionParameters(ddl);
-        expect(result).toContainEqual({ type: 'inputParameter', name: 'TV_INPUT' });
+        expect(result).toContainEqual({ type: 'inputParameter', name: 'TV_INPUT', lineNumber: 3 });
         expect(result.map((s) => s.name)).not.toContain('COL1');
         expect(result.map((s) => s.name)).not.toContain('COL2');
     });
@@ -188,8 +188,8 @@ describe('AC-6: function body SQL does not pollute extraction', () => {
         `;
         const result = extractFunctionParameters(ddl);
         expect(result).toEqual([
-            { type: 'inputParameter', name: 'IV_STATUS' },
-            { type: 'inputParameter', name: 'IV_ID' }
+            { type: 'inputParameter', name: 'IV_STATUS', lineNumber: 2 },
+            { type: 'inputParameter', name: 'IV_ID', lineNumber: 2 }
         ]);
     });
 });
@@ -251,7 +251,8 @@ describe('AC-9: quoted identifier normalisation', () => {
         const ddl = `FUNCTION F (IN "IV_CUSTOMER_ID" NVARCHAR(10)) RETURNS INTEGER AS BEGIN END`;
         expect(extractFunctionParameters(ddl)).toContainEqual({
             type: 'inputParameter',
-            name: 'IV_CUSTOMER_ID'
+            name: 'IV_CUSTOMER_ID',
+            lineNumber: 1
         });
     });
 

@@ -30,8 +30,8 @@ describe('AC-1: IN parameter extraction', () => {
             ) AS BEGIN END
         `;
         expect(extractProcedureParameters(ddl)).toEqual([
-            { type: 'inputParameter', name: 'IV_CUSTOMER_ID' },
-            { type: 'inputParameter', name: 'IV_DATE' }
+            { type: 'inputParameter', name: 'IV_CUSTOMER_ID', lineNumber: 3 },
+            { type: 'inputParameter', name: 'IV_DATE', lineNumber: 4 }
         ]);
     });
 
@@ -59,8 +59,8 @@ describe('AC-2: OUT parameter extraction', () => {
             ) AS BEGIN END
         `;
         expect(extractProcedureParameters(ddl)).toEqual([
-            { type: 'outputParameter', name: 'EV_COUNT' },
-            { type: 'outputParameter', name: 'EV_STATUS' }
+            { type: 'outputParameter', name: 'EV_COUNT', lineNumber: 3 },
+            { type: 'outputParameter', name: 'EV_STATUS', lineNumber: 4 }
         ]);
     });
 
@@ -78,16 +78,16 @@ describe('AC-3: INOUT parameter yields inputParameter and outputParameter', () =
     it('produces both types for an INOUT scalar parameter', () => {
         const ddl = `PROCEDURE P (INOUT CV_STATUS NVARCHAR(1)) AS BEGIN END`;
         expect(extractProcedureParameters(ddl)).toEqual([
-            { type: 'inputParameter', name: 'CV_STATUS' },
-            { type: 'outputParameter', name: 'CV_STATUS' }
+            { type: 'inputParameter', name: 'CV_STATUS', lineNumber: 1 },
+            { type: 'outputParameter', name: 'CV_STATUS', lineNumber: 1 }
         ]);
     });
 
     it('produces both types for an INOUT TABLE parameter', () => {
         const ddl = `PROCEDURE P (INOUT TV_RESULT TABLE (ID INTEGER)) AS BEGIN END`;
         const result = extractProcedureParameters(ddl);
-        expect(result).toContainEqual({ type: 'inputParameter', name: 'TV_RESULT' });
-        expect(result).toContainEqual({ type: 'outputParameter', name: 'TV_RESULT' });
+        expect(result).toContainEqual({ type: 'inputParameter', name: 'TV_RESULT', lineNumber: 1 });
+        expect(result).toContainEqual({ type: 'outputParameter', name: 'TV_RESULT', lineNumber: 1 });
     });
 
     it('yields exactly two entries for a single INOUT parameter', () => {
@@ -108,7 +108,7 @@ describe('AC-4: TABLE-type parameter columns not extracted', () => {
             ) AS BEGIN END
         `;
         const result = extractProcedureParameters(ddl);
-        expect(result).toContainEqual({ type: 'inputParameter', name: 'TV_INPUT' });
+        expect(result).toContainEqual({ type: 'inputParameter', name: 'TV_INPUT', lineNumber: 3 });
         expect(result.map((s) => s.name)).not.toContain('COL1');
         expect(result.map((s) => s.name)).not.toContain('COL2');
     });
@@ -253,7 +253,8 @@ describe('AC-8: quoted identifier normalisation', () => {
         const ddl = `PROCEDURE P (IN "IV_CUSTOMER_ID" NVARCHAR(10)) AS BEGIN END`;
         expect(extractProcedureParameters(ddl)).toContainEqual({
             type: 'inputParameter',
-            name: 'IV_CUSTOMER_ID'
+            name: 'IV_CUSTOMER_ID',
+            lineNumber: 1
         });
     });
 
@@ -261,7 +262,8 @@ describe('AC-8: quoted identifier normalisation', () => {
         const ddl = `PROCEDURE P (OUT "EV_RESULT" INTEGER) AS BEGIN END`;
         expect(extractProcedureParameters(ddl)).toContainEqual({
             type: 'outputParameter',
-            name: 'EV_RESULT'
+            name: 'EV_RESULT',
+            lineNumber: 1
         });
     });
 });
@@ -401,10 +403,10 @@ describe('mixed parameter modes', () => {
             ) AS BEGIN END
         `;
         const result = extractProcedureParameters(ddl);
-        expect(result).toContainEqual({ type: 'inputParameter', name: 'IV_ID' });
-        expect(result).toContainEqual({ type: 'outputParameter', name: 'EV_COUNT' });
-        expect(result).toContainEqual({ type: 'inputParameter', name: 'CV_STATUS' });
-        expect(result).toContainEqual({ type: 'outputParameter', name: 'CV_STATUS' });
+        expect(result).toContainEqual({ type: 'inputParameter', name: 'IV_ID', lineNumber: 3 });
+        expect(result).toContainEqual({ type: 'outputParameter', name: 'EV_COUNT', lineNumber: 4 });
+        expect(result).toContainEqual({ type: 'inputParameter', name: 'CV_STATUS', lineNumber: 5 });
+        expect(result).toContainEqual({ type: 'outputParameter', name: 'CV_STATUS', lineNumber: 5 });
         expect(result).toHaveLength(4);
     });
 

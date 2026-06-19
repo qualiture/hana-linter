@@ -3,6 +3,7 @@ import type { ContentTarget } from './rules';
 export type ExtractedSubject = {
     readonly type: ContentTarget;
     readonly name: string;
+    readonly lineNumber?: number;
 };
 
 export type LintIssue = {
@@ -11,6 +12,7 @@ export type LintIssue = {
     readonly extension: string;
     readonly subjectType?: 'artifact' | 'field' | 'inputParameter' | 'outputParameter';
     readonly subjectName?: string;
+    readonly lineNumber?: number;
     readonly failedRuleDescription: string;
     readonly failedPattern: string;
 };

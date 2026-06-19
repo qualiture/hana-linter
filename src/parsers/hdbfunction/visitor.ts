@@ -49,10 +49,10 @@ export class HdbFunctionParameterVisitor extends BaseCstVisitorWithDefaults {
         const nameNodes = ctx['parameterName'] as CstNode[] | undefined;
         if (!nameNodes?.length || !nameNodes[0]) return;
 
-        const name = this.extractName(nameNodes[0]);
-        if (!name) return;
+        const extracted = this.extractName(nameNodes[0]);
+        if (!extracted) return;
 
-        this.parameters.push({ type: 'inputParameter', name });
+        this.parameters.push({ type: 'inputParameter', name: extracted.name, lineNumber: extracted.lineNumber });
     }
 
     // -----------------------------------------------------------------------
@@ -97,7 +97,7 @@ export class HdbFunctionParameterVisitor extends BaseCstVisitorWithDefaults {
     // Strips surrounding double-quotes from quoted identifiers.
     // -----------------------------------------------------------------------
 
-    private extractName(node: CstNode): string | undefined {
+    private extractName(node: CstNode): { name: string; lineNumber?: number } | undefined {
         if (!node.children) return undefined;
 
         // parameterName → identifier → Identifier | QuotedIdentifier
@@ -113,6 +113,7 @@ export class HdbFunctionParameterVisitor extends BaseCstVisitorWithDefaults {
         if (!token) return undefined;
 
         const raw = token.image;
-        return raw.startsWith('"') ? raw.slice(1, -1) : raw;
+        const name = raw.startsWith('"') ? raw.slice(1, -1) : raw;
+        return { name, lineNumber: token.startLine };
     }
 }

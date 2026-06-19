@@ -24,9 +24,9 @@ describe('AC-1: standard column extraction', () => {
             )
         `;
         expect(extractTableColumns(ddl)).toEqual([
-            { type: 'field', name: 'ID' },
-            { type: 'field', name: 'NAME' },
-            { type: 'field', name: 'CREATED_AT' }
+            { type: 'field', name: 'ID', lineNumber: 3 },
+            { type: 'field', name: 'NAME', lineNumber: 4 },
+            { type: 'field', name: 'CREATED_AT', lineNumber: 5 }
         ]);
     });
 
@@ -121,7 +121,7 @@ describe('AC-3: line comment exclusion', () => {
 describe('AC-4: quoted identifier normalisation', () => {
     it('strips surrounding double-quotes from a quoted column identifier', () => {
         const ddl = `COLUMN TABLE "MY_TABLE" ("MY_COLUMN" NVARCHAR(100))`;
-        expect(extractTableColumns(ddl)).toContainEqual({ type: 'field', name: 'MY_COLUMN' });
+        expect(extractTableColumns(ddl)).toContainEqual({ type: 'field', name: 'MY_COLUMN', lineNumber: 1 });
     });
 
     it('strips quotes even when the table name is also quoted', () => {
@@ -309,8 +309,8 @@ describe('mixed quoted and unquoted identifiers', () => {
     it('handles a mix in the same table', () => {
         const ddl = `COLUMN TABLE T ("QUOTED" INTEGER, UNQUOTED NVARCHAR(10))`;
         expect(extractTableColumns(ddl)).toEqual([
-            { type: 'field', name: 'QUOTED' },
-            { type: 'field', name: 'UNQUOTED' }
+            { type: 'field', name: 'QUOTED', lineNumber: 1 },
+            { type: 'field', name: 'UNQUOTED', lineNumber: 1 }
         ]);
     });
 });

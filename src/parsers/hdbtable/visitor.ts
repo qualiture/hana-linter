@@ -50,10 +50,11 @@ export class HdbTableColumnVisitor extends BaseCstVisitorWithDefaults {
             return;
         }
 
-        const raw = (tokenElement as IToken).image;
+        const token = tokenElement as IToken;
+        const raw = token.image;
         // Strip surrounding double-quotes from quoted identifiers ("MY_COL" → MY_COL).
         const name = raw.startsWith('"') ? raw.slice(1, -1) : raw;
 
-        this.columns.push({ type: 'field', name });
+        this.columns.push({ type: 'field', name, lineNumber: token.startLine });
     }
 }

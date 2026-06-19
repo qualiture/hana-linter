@@ -83,6 +83,7 @@ function evaluateAllRules(filePath: string, extension: string, subject: Extracte
                 extension,
                 subjectType: subject.type,
                 subjectName: subject.name,
+                lineNumber: subject.lineNumber,
                 failedRuleDescription: rule.description,
                 failedPattern: toRegexLiteral(rule)
             });
@@ -106,6 +107,7 @@ function evaluateAnyRules(filePath: string, extension: string, subject: Extracte
             extension,
             subjectType: subject.type,
             subjectName: subject.name,
+            lineNumber: subject.lineNumber,
             failedRuleDescription: 'At least one OR-group rule must match: ' + rules.map((rule) => rule.description).join(' | '),
             failedPattern: rules.map(toRegexLiteral).join(' OR ')
         }
