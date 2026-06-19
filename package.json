@@ -1,6 +1,6 @@
 {
     "name": "hana-linter",
-    "version": "0.2.1",
+    "version": "1.0.0",
     "description": "Linter for SAP HANA artifacts in an SAP CAP project",
     "main": "./dist/index.js",
     "bin": {
