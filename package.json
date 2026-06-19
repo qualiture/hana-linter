@@ -1,28 +1,34 @@
 {
-  "name": "hana-linter",
-  "version": "0.2.1",
-  "description": "Linter for SAP HANA artifacts in an SAP CAP project",
-  "main": "./dist/index.js",
-  "bin": {
-    "hana-linter": "./dist/index.js"
-  },
-  "keywords": [
-    "hana",
-    "lint",
-    "cap",
-    "npm"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/qualiture/hana-linter.git"
-  },
-  "scripts": {
-    "build": "tsc",
-    "test": "echo \"Warning: no test specified\" && exit 0"
-  },
-  "author": "Robin van het Hof (Qualiture)",
-  "license": "MIT",
-  "devDependencies": {
-    "@types/node": "^25.9.3"
-  }
+    "name": "hana-linter",
+    "version": "1.0.0",
+    "description": "Linter for SAP HANA artifacts in an SAP CAP project",
+    "main": "./dist/index.js",
+    "bin": {
+        "hana-linter": "./dist/index.js"
+    },
+    "keywords": [
+        "hana",
+        "lint",
+        "cap",
+        "npm"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/qualiture/hana-linter.git"
+    },
+    "scripts": {
+        "build": "tsc",
+        "test": "vitest run",
+        "test:coverage": "vitest run --coverage"
+    },
+    "author": "Robin van het Hof (Qualiture)",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/node": "^25.9.3",
+        "@vitest/coverage-v8": "^4.1.9",
+        "vitest": "^4.1.9"
+    },
+    "dependencies": {
+        "chevrotain": "^12.0.0"
+    }
 }

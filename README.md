@@ -5,11 +5,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/qualiture/hana-linter/blob/main/LICENSE)
 [![Node >=14](https://img.shields.io/badge/node-%3E%3D14-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 
-Regex-first naming lint for SAP HANA artifacts in CAP projects.
+Naming-convention lint for SAP HANA artifacts in CAP projects.
 
 [NPM package](https://www.npmjs.com/package/hana-linter) • [Report issue](https://github.com/qualiture/hana-linter/issues) • [Releases](https://github.com/qualiture/hana-linter/releases)
 
-Lint SAP HANA artifact names in CAP projects using configurable regex-based naming rules.
+Lint SAP HANA artifact file names and content identifiers in CAP projects using configurable regex-based naming rules.
 
 ## Why
 
@@ -37,6 +37,8 @@ Rule groups per extension:
 - `groups.any`: at least one rule must match (OR)
 
 You can define `extension: "*"` as a shared rule set. Its rules are applied to every file extension and are merged with any extension-specific rule set.
+
+Content-based linting uses [Chevrotain](https://chevrotain.io)-powered lexers and CST parsers to reliably extract identifiers from HANA artifact files. This approach correctly handles block and line comments, multi-line definitions, quoted identifiers, and HANA-specific DDL constructs — without the false positives and false negatives that ad-hoc regex scanning produces.
 
 ## Install
 
@@ -151,9 +153,12 @@ Each `contentRuleSets` item contains:
 
 Supported extractors in this version:
 
-- `field`: `.hdbtable`
-- `inputParameter`: `.hdbprocedure`, `.hdbfunction`
-- `outputParameter`: `.hdbprocedure`, `.hdbfunction`
+| `target`          | Supported extensions            | Extracted identifiers                          |
+| ----------------- | ------------------------------- | ---------------------------------------------- |
+| `field`           | `.hdbtable`                     | Column names                                   |
+| `field`           | `.hdbview`                      | Column aliases (explicit list or `AS` aliases) |
+| `inputParameter`  | `.hdbprocedure`, `.hdbfunction` | `IN` and `INOUT` parameters                    |
+| `outputParameter` | `.hdbprocedure`, `.hdbfunction` | `OUT` and `INOUT` parameters                   |
 
 ### Default Config Example
 
@@ -239,6 +244,18 @@ Supported extractors in this version:
                     {
                         "description": "Output parameters prefixed with OP_",
                         "pattern": "^OP_[A-Z0-9_]+$"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbview",
+            "target": "field",
+            "groups": {
+                "all": [
+                    {
+                        "description": "View column aliases in uppercase snake case",
+                        "pattern": "^[A-Z0-9]+(?:_[A-Z0-9]+)*$"
                     }
                 ]
             }

@@ -4,9 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-### 0.2.0
+### 1.0.0
 
-- Fixes npm publish 
+- Replaced ad-hoc, line-by-line regex extraction with Chevrotain-based lexer + CST parsers for `.hdbtable`, `.hdbprocedure`, and `.hdbview` files
+- Added Chevrotain-based `.hdbview` parser; content-linting of view column aliases is now fully supported (both explicit column-list and `SELECT AS` alias modes)
+- The `.hdbprocedure` parser isolates the parameter list from the procedure body (`AS BEGIN … END`), eliminating false positives caused by `IN`/`OUT`/`INOUT` keywords inside SQL body statements
+- The `.hdbtable` parser correctly handles HANA-specific DDL variants (COLUMN TABLE, ROW TABLE, GLOBAL TEMPORARY COLUMN TABLE), constraint clauses, partition clauses, and quoted identifiers — removing false positives from the previous regex approach
+- All three parsers gracefully handle block comments (`/* … */`), line comments (`-- …`), multi-line definitions, and schema-qualified identifiers
+
+### 0.2.1
+
+- Fixes npm publish
 
 ### 0.2.0
 
