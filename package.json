@@ -1,6 +1,6 @@
 {
     "name": "hana-linter",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Linter for SAP HANA artifacts in an SAP CAP project",
     "main": "./dist/index.js",
     "bin": {
@@ -17,7 +17,7 @@
         "url": "git+https://github.com/qualiture/hana-linter.git"
     },
     "scripts": {
-        "build": "tsc",
+        "build": "tsc && copyfiles -u 1 \"src/assets/.hana-linter.json\" dist",
         "test": "vitest run",
         "test:coverage": "vitest run --coverage"
     },
@@ -26,6 +26,7 @@
     "devDependencies": {
         "@types/node": "^25.9.3",
         "@vitest/coverage-v8": "^4.1.9",
+        "copyfiles": "^2.4.1",
         "vitest": "^4.1.9"
     },
     "dependencies": {

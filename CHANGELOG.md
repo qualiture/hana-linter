@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+### 1.0.3
+
+- Fixed build: `src/assets/.hana-linter.json` is now correctly copied to `dist/assets/` during `pnpm build` via `copyfiles`, ensuring the default config template is bundled in the published package
+
+---
+
 ### 1.0.2
 
 - Added Chevrotain-based `.hdbfunction` parser; content-linting of function input parameters is now fully reliable
