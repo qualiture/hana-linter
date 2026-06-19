@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+### 1.1.0
+
+- Console output is now grouped by file, then by failed rule, reducing noise when multiple violations exist in the same file
+- Added line numbers to content-lint violations (fields, input/output parameters) so users can jump directly to the offending identifier in their editor
+- All four Chevrotain visitors (`hdbtable`, `hdbview`, `hdbprocedure`, `hdbfunction`) now capture `token.startLine` from the parsed token and propagate it through `ExtractedSubject` and `LintIssue`
+
+---
+
 ### 1.0.3
 
 - Fixed build: `src/assets/.hana-linter.json` is now correctly copied to `dist/assets/` during `pnpm build` via `copyfiles`, ensuring the default config template is bundled in the published package

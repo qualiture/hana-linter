@@ -2,6 +2,7 @@ import { LintIssue } from './types/issues';
 
 /**
  * Print lint result report to stdout/stderr.
+ * Issues are grouped by file, then by failed rule.
  *
  * @param issues - Found naming violations.
  * @param filesToValidate - Number of candidate files processed.
@@ -15,15 +16,47 @@ export function printReport(issues: readonly LintIssue[], filesToValidate: reado
     console.error(`❌ HANA naming lint failed. Violations: ${issues.length}`);
     console.error('');
 
+    // Group issues by file path.
+    const byFile = new Map<string, LintIssue[]>();
     for (const issue of issues) {
-        console.error(`- File: ${issue.filePath}`);
-        console.error(`  Artifact: ${issue.artifactName}`);
-        if (issue.subjectType && issue.subjectName) {
-            console.error(`  Subject: ${issue.subjectType} (${issue.subjectName})`);
+        const bucket = byFile.get(issue.filePath);
+        if (bucket) {
+            bucket.push(issue);
+        } else {
+            byFile.set(issue.filePath, [issue]);
         }
-        console.error(`  Type: ${issue.extension}`);
-        console.error(`  Failed rule: ${issue.failedRuleDescription}`);
-        console.error(`  Expected regex: ${issue.failedPattern}`);
+    }
+
+    for (const [filePath, fileIssues] of byFile) {
+        const count = fileIssues.length;
+        console.error(`File: ${filePath}  (${count} violation${count === 1 ? '' : 's'})`);
+
+        // Group file issues by failed rule description.
+        const byRule = new Map<string, LintIssue[]>();
+        for (const issue of fileIssues) {
+            const key = `${issue.failedRuleDescription}||${issue.failedPattern}`;
+            const bucket = byRule.get(key);
+            if (bucket) {
+                bucket.push(issue);
+            } else {
+                byRule.set(key, [issue]);
+            }
+        }
+
+        for (const ruleIssues of byRule.values()) {
+            const { failedRuleDescription, failedPattern } = ruleIssues[0]!;
+            console.error(`  Rule: "${failedRuleDescription}" (pattern: ${failedPattern})`);
+
+            for (const issue of ruleIssues) {
+                const location = issue.lineNumber !== undefined ? ` at line ${issue.lineNumber}` : '';
+                if (issue.subjectType && issue.subjectName) {
+                    console.error(`    - ${issue.subjectType} "${issue.subjectName}"${location}`);
+                } else {
+                    console.error(`    - artifact "${issue.artifactName}"${location}`);
+                }
+            }
+        }
+
         console.error('');
     }
 }

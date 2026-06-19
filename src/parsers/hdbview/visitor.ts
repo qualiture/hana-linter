@@ -125,6 +125,6 @@ export class HdbViewColumnVisitor extends BaseCstVisitorWithDefaults {
         const raw = token.image;
         // Strip surrounding double-quotes: "MY_COL" → MY_COL.
         const name = raw.startsWith('"') ? raw.slice(1, -1) : raw;
-        this.columns.push({ type: 'field', name });
+        this.columns.push({ type: 'field', name, lineNumber: token.startLine });
     }
 }

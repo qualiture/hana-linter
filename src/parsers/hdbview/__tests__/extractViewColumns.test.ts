@@ -49,8 +49,8 @@ describe('AC-2: SELECT alias extraction (no explicit column list)', () => {
     it('extracts AS aliases from the top-level SELECT clause', () => {
         const ddl = `VIEW V_BAR AS SELECT T."CUST_ID" AS "ID", T."CUST_NAME" AS "NAME" FROM T`;
         expect(extractViewColumns(ddl)).toEqual([
-            { type: 'field', name: 'ID' },
-            { type: 'field', name: 'NAME' }
+            { type: 'field', name: 'ID', lineNumber: 1 },
+            { type: 'field', name: 'NAME', lineNumber: 1 }
         ]);
     });
 
@@ -182,12 +182,12 @@ describe('AC-5: line comment exclusion', () => {
 describe('AC-6: quoted identifier normalisation', () => {
     it('strips double-quotes from quoted aliases', () => {
         const ddl = `VIEW V AS SELECT T.X AS "MY_ALIAS" FROM T`;
-        expect(extractViewColumns(ddl)).toContainEqual({ type: 'field', name: 'MY_ALIAS' });
+        expect(extractViewColumns(ddl)).toContainEqual({ type: 'field', name: 'MY_ALIAS', lineNumber: 1 });
     });
 
     it('strips double-quotes from quoted names in explicit column list', () => {
         const ddl = `VIEW V ("MY_COL") AS SELECT T.X FROM T`;
-        expect(extractViewColumns(ddl)).toContainEqual({ type: 'field', name: 'MY_COL' });
+        expect(extractViewColumns(ddl)).toContainEqual({ type: 'field', name: 'MY_COL', lineNumber: 1 });
     });
 });
 
