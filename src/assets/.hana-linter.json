@@ -291,6 +291,18 @@
                     }
                 ]
             }
+        },
+        {
+            "extension": ".hdbsequence",
+            "target": "sequenceName",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Sequence names in uppercase snake case",
+                        "pattern": "^[A-Z0-9]+(?:_[A-Z0-9]+)*$"
+                    }
+                ]
+            }
         }
     ]
 }

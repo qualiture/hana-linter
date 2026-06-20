@@ -40,7 +40,7 @@ Rule groups per extension:
 
 You can define `extension: "*"` as a shared rule set. Its rules are applied to every file extension and are merged with any extension-specific rule set.
 
-Content-based linting uses purpose-built parsers to reliably extract identifiers from HANA artifact files. SQL DDL artifact types (`.hdbtable`, `.hdbview`, `.hdbprocedure`, `.hdbfunction`, `.hdbtabletype`, `.hdbrole`) use [Chevrotain](https://chevrotain.io)-powered lexers and CST parsers that correctly handle block and line comments, multi-line definitions, quoted identifiers, and HANA-specific DDL constructs. The XML-based `.hdbcalculationview` format uses [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser) to navigate the logical model tree — without the false positives and false negatives that ad-hoc regex scanning produces.
+Content-based linting uses purpose-built parsers to reliably extract identifiers from HANA artifact files. SQL DDL artifact types (`.hdbtable`, `.hdbview`, `.hdbprocedure`, `.hdbfunction`, `.hdbtabletype`, `.hdbrole`, `.hdbsequence`) use [Chevrotain](https://chevrotain.io)-powered lexers and CST parsers that correctly handle block and line comments, multi-line definitions, quoted identifiers, and HANA-specific DDL constructs. The XML-based `.hdbcalculationview` format uses [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser) to navigate the logical model tree — without the false positives and false negatives that ad-hoc regex scanning produces.
 
 ## Parser Status
 
@@ -56,7 +56,7 @@ Content-based linting uses purpose-built parsers to reliably extract identifiers
 | `.hdbrole`                | Chevrotain lexer + CST | ✅ Migrated            |
 | `.hdbcalculationview`     | fast-xml-parser (XML)  | ✅ Migrated            |
 | `.hdbanalyticalprivilege` | —                      | ❌ Not yet implemented |
-| `.hdbsequence`            | —                      | ❌ Not yet implemented |
+| `.hdbsequence`            | Chevrotain lexer + CST | ✅ Migrated            |
 | `.hdbconstraint`          | —                      | ❌ Not yet implemented |
 | `.hdbschedulerjob`        | —                      | ❌ Not yet implemented |
 | `.hdbindex`               | —                      | ❌ Not yet implemented |
@@ -190,6 +190,7 @@ Supported extractors in this version:
 | `grantedRoleName` | `.hdbrole`            | Each role listed in `extends roles { ... }`                                   |
 | `field`           | `.hdbcalculationview` | Output attributes, calculated attributes, base/calculated/restricted measures |
 | `inputParameter`  | `.hdbcalculationview` | Input parameters (`variable[@parameter="true"]`)                              |
+| `sequenceName`    | `.hdbsequence`        | The sequence name declared in the file                                        |
 
 ### Default Config Example
 
@@ -347,6 +348,18 @@ Supported extractors in this version:
                     {
                         "description": "Input parameters prefixed with IP_",
                         "pattern": "^IP_[A-Z0-9_]+$"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbsequence",
+            "target": "sequenceName",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Sequence names in uppercase snake case",
+                        "pattern": "^[A-Z0-9]+(?:_[A-Z0-9]+)*$"
                     }
                 ]
             }
