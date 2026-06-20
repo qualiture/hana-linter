@@ -53,9 +53,9 @@ Content-based linting uses [Chevrotain](https://chevrotain.io)-powered lexers an
 | `.hdbprocedure`           | Chevrotain lexer + CST | ✅ Migrated            |
 | `.hdbfunction`            | Chevrotain lexer + CST | ✅ Migrated            |
 | `.hdbtabletype`           | Chevrotain lexer + CST | ✅ Migrated            |
+| `.hdbrole`                | Chevrotain lexer + CST | ✅ Migrated            |
 | `.hdbcalculationview`     | —                      | ❌ Not yet implemented |
 | `.hdbanalyticalprivilege` | —                      | ❌ Not yet implemented |
-| `.hdbrole`                | —                      | ❌ Not yet implemented |
 | `.hdbsequence`            | —                      | ❌ Not yet implemented |
 | `.hdbconstraint`          | —                      | ❌ Not yet implemented |
 | `.hdbschedulerjob`        | —                      | ❌ Not yet implemented |
@@ -185,6 +185,8 @@ Supported extractors in this version:
 | `inputParameter`  | `.hdbprocedure`      | `IN` and `INOUT` parameters                    |
 | `inputParameter`  | `.hdbfunction`       | `IN` parameters (functions accept `IN` only)   |
 | `outputParameter` | `.hdbprocedure`      | `OUT` and `INOUT` parameters                   |
+| `roleName`        | `.hdbrole`           | The role name defined in the file              |
+| `grantedRoleName` | `.hdbrole`           | Each role listed in `extends roles { ... }`    |
 
 ### Default Config Example
 
