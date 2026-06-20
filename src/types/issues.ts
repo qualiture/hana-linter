@@ -19,7 +19,8 @@ export type LintIssue = {
         | 'grantedRoleName'
         | 'sequenceName'
         | 'jobAction'
-        | 'indexName';
+        | 'indexName'
+        | 'triggerName';
     readonly subjectName?: string;
     readonly lineNumber?: number;
     readonly failedRuleDescription: string;

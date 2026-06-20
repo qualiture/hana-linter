@@ -12,6 +12,7 @@ import { extractCalculationViewOutputs } from './parsers/hdbcalculationview/inde
 import { extractSequenceName } from './parsers/hdbsequence/index';
 import { extractSchedulerJobAction } from './parsers/hdbschedulerjob/index';
 import { extractIndexName } from './parsers/hdbindex/index';
+import { extractTriggerName } from './parsers/hdbtrigger/index';
 
 /**
  * Run content-based naming lint for a file.
@@ -97,6 +98,10 @@ function extractSubjects(extension: string, fileContent: string): ExtractedSubje
 
     if (extension === '.hdbindex') {
         return extractIndexName(fileContent);
+    }
+
+    if (extension === '.hdbtrigger') {
+        return extractTriggerName(fileContent);
     }
 
     return [];

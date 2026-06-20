@@ -48,7 +48,8 @@ export type ContentTarget =
     | 'grantedRoleName'
     | 'sequenceName'
     | 'jobAction'
-    | 'indexName';
+    | 'indexName'
+    | 'triggerName';
 
 export type JsonContentRuleSet = {
     /**
