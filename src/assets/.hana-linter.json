@@ -219,6 +219,78 @@
                     }
                 ]
             }
+        },
+        {
+            "extension": ".hdbview",
+            "target": "field",
+            "groups": {
+                "all": [
+                    {
+                        "description": "View column aliases in uppercase snake case",
+                        "pattern": "^[A-Z0-9]+(?:_[A-Z0-9]+)*$"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbfunction",
+            "target": "inputParameter",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Input parameters prefixed with IP_",
+                        "pattern": "^IP_[A-Z0-9_]+$"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbtabletype",
+            "target": "field",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Field names in uppercase snake case",
+                        "pattern": "^[A-Z0-9]+(?:_[A-Z0-9]+)*$"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbrole",
+            "target": "roleName",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Role names prefixed with R_",
+                        "pattern": "^R_.+"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbcalculationview",
+            "target": "field",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Output column IDs in uppercase snake case",
+                        "pattern": "^[A-Z0-9]+(?:_[A-Z0-9]+)*$"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbcalculationview",
+            "target": "inputParameter",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Input parameters prefixed with IP_",
+                        "pattern": "^IP_[A-Z0-9_]+$"
+                    }
+                ]
+            }
         }
     ]
 }

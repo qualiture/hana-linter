@@ -9,7 +9,7 @@ Naming-convention lint for SAP HANA artifacts in CAP projects.
 
 > **⚠️ Work in progress.** This project is under active development. APIs, configuration options, and supported artifact types may change between releases. See [Parser Status](#parser-status) for the current state of content extraction support.
 
-[NPM package](https://www.npmjs.com/package/hana-linter) • [Report issue](https://github.com/qualiture/hana-linter/issues) • [Releases](https://github.com/qualiture/hana-linter/releases)
+[NPM package](https://www.npmjs.com/package/hana-linter) • [Report issue](https://github.com/qualiture/hana-linter/issues)
 
 Lint SAP HANA artifact file names and content identifiers in CAP projects using configurable regex-based naming rules.
 
@@ -40,7 +40,7 @@ Rule groups per extension:
 
 You can define `extension: "*"` as a shared rule set. Its rules are applied to every file extension and are merged with any extension-specific rule set.
 
-Content-based linting uses [Chevrotain](https://chevrotain.io)-powered lexers and CST parsers to reliably extract identifiers from HANA artifact files. This approach correctly handles block and line comments, multi-line definitions, quoted identifiers, and HANA-specific DDL constructs — without the false positives and false negatives that ad-hoc regex scanning produces.
+Content-based linting uses purpose-built parsers to reliably extract identifiers from HANA artifact files. SQL DDL artifact types (`.hdbtable`, `.hdbview`, `.hdbprocedure`, `.hdbfunction`, `.hdbtabletype`, `.hdbrole`) use [Chevrotain](https://chevrotain.io)-powered lexers and CST parsers that correctly handle block and line comments, multi-line definitions, quoted identifiers, and HANA-specific DDL constructs. The XML-based `.hdbcalculationview` format uses [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser) to navigate the logical model tree — without the false positives and false negatives that ad-hoc regex scanning produces.
 
 ## Parser Status
 
@@ -52,16 +52,17 @@ Content-based linting uses [Chevrotain](https://chevrotain.io)-powered lexers an
 | `.hdbview`                | Chevrotain lexer + CST | ✅ Migrated            |
 | `.hdbprocedure`           | Chevrotain lexer + CST | ✅ Migrated            |
 | `.hdbfunction`            | Chevrotain lexer + CST | ✅ Migrated            |
-| `.hdbtabletype`           | —                      | ❌ Not yet implemented |
-| `.hdbcalculationview`     | —                      | ❌ Not yet implemented |
+| `.hdbtabletype`           | Chevrotain lexer + CST | ✅ Migrated            |
+| `.hdbrole`                | Chevrotain lexer + CST | ✅ Migrated            |
+| `.hdbcalculationview`     | fast-xml-parser (XML)  | ✅ Migrated            |
 | `.hdbanalyticalprivilege` | —                      | ❌ Not yet implemented |
-| `.hdbrole`                | —                      | ❌ Not yet implemented |
 | `.hdbsequence`            | —                      | ❌ Not yet implemented |
 | `.hdbconstraint`          | —                      | ❌ Not yet implemented |
 | `.hdbschedulerjob`        | —                      | ❌ Not yet implemented |
 | `.hdbindex`               | —                      | ❌ Not yet implemented |
 | `.hdbtrigger`             | —                      | ❌ Not yet implemented |
 
+- The regex **file name** validations for all of the above listed extensions **are implemented**. The **content extractor** hasn't been implemented everywhere yet.
 - **Not implemented**: `contentRuleSets` targeting these extensions will silently return no results — no identifiers are extracted and no content issues are raised.
 
 ## Install
@@ -177,13 +178,18 @@ Each `contentRuleSets` item contains:
 
 Supported extractors in this version:
 
-| `target`          | Supported extensions | Extracted identifiers                          |
-| ----------------- | -------------------- | ---------------------------------------------- |
-| `field`           | `.hdbtable`          | Column names                                   |
-| `field`           | `.hdbview`           | Column aliases (explicit list or `AS` aliases) |
-| `inputParameter`  | `.hdbprocedure`      | `IN` and `INOUT` parameters                    |
-| `inputParameter`  | `.hdbfunction`       | `IN` parameters (functions accept `IN` only)   |
-| `outputParameter` | `.hdbprocedure`      | `OUT` and `INOUT` parameters                   |
+| `target`          | Supported extensions  | Extracted identifiers                                                         |
+| ----------------- | --------------------- | ----------------------------------------------------------------------------- |
+| `field`           | `.hdbtable`           | Column names                                                                  |
+| `field`           | `.hdbview`            | Column aliases (explicit list or `AS` aliases)                                |
+| `field`           | `.hdbtabletype`       | Column names                                                                  |
+| `inputParameter`  | `.hdbprocedure`       | `IN` and `INOUT` parameters                                                   |
+| `inputParameter`  | `.hdbfunction`        | `IN` parameters (functions accept `IN` only)                                  |
+| `outputParameter` | `.hdbprocedure`       | `OUT` and `INOUT` parameters                                                  |
+| `roleName`        | `.hdbrole`            | The role name defined in the file                                             |
+| `grantedRoleName` | `.hdbrole`            | Each role listed in `extends roles { ... }`                                   |
+| `field`           | `.hdbcalculationview` | Output attributes, calculated attributes, base/calculated/restricted measures |
+| `inputParameter`  | `.hdbcalculationview` | Input parameters (`variable[@parameter="true"]`)                              |
 
 ### Default Config Example
 
@@ -284,6 +290,66 @@ Supported extractors in this version:
                     }
                 ]
             }
+        },
+        {
+            "extension": ".hdbfunction",
+            "target": "inputParameter",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Input parameters prefixed with IP_",
+                        "pattern": "^IP_[A-Z0-9_]+$"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbtabletype",
+            "target": "field",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Field names in uppercase snake case",
+                        "pattern": "^[A-Z0-9]+(?:_[A-Z0-9]+)*$"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbrole",
+            "target": "roleName",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Role names prefixed with R_",
+                        "pattern": "^R_.+"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbcalculationview",
+            "target": "field",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Output column IDs in uppercase snake case",
+                        "pattern": "^[A-Z0-9]+(?:_[A-Z0-9]+)*$"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbcalculationview",
+            "target": "inputParameter",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Input parameters prefixed with IP_",
+                        "pattern": "^IP_[A-Z0-9_]+$"
+                    }
+                ]
+            }
         }
     ]
 }
@@ -313,6 +379,43 @@ jobs:
 			- run: npm ci
 			- run: npx hana-linter
 ```
+
+## Pre-commit Hook (husky + lint-staged)
+
+hana-linter's file-list mode (passing files as arguments) integrates cleanly with [lint-staged](https://github.com/lint-staged/lint-staged): lint-staged appends each staged file that matches the glob to the command, so only the files you are about to commit are linted.
+
+**1. Install the tools**
+
+```bash
+npm install --save-dev husky lint-staged
+npx husky init
+```
+
+**2. Configure lint-staged**
+
+Add a `lint-staged` key to `package.json`:
+
+```json
+{
+    "lint-staged": {
+        "*.hdb*": "hana-linter"
+    }
+}
+```
+
+lint-staged turns this into `hana-linter <file1> <file2> …` for every staged file that matches the glob, which is exactly the file-list mode hana-linter supports.
+
+**3. Wire the pre-commit hook**
+
+Replace the contents of `.husky/pre-commit` with:
+
+```bash
+npx lint-staged
+```
+
+Now, every `git commit` will automatically run hana-linter against the staged HANA artifact files. If any naming violations are found, the commit is blocked and the issues are reported in the terminal.
+
+> **Tip:** Add `hana-linter` to `dependencies` (not `devDependencies`) if the linter also runs in production CI, so it is available after a plain `npm ci --production` install. For pre-commit-only use, `devDependencies` is fine.
 
 ## Requirements
 
