@@ -10,6 +10,7 @@ import { extractTableTypeColumns } from './parsers/hdbtabletype/index';
 import { extractRoleNames } from './parsers/hdbrole/index';
 import { extractCalculationViewOutputs } from './parsers/hdbcalculationview/index';
 import { extractSequenceName } from './parsers/hdbsequence/index';
+import { extractSchedulerJobAction } from './parsers/hdbschedulerjob/index';
 
 /**
  * Run content-based naming lint for a file.
@@ -87,6 +88,10 @@ function extractSubjects(extension: string, fileContent: string): ExtractedSubje
 
     if (extension === '.hdbsequence') {
         return extractSequenceName(fileContent);
+    }
+
+    if (extension === '.hdbschedulerjob') {
+        return extractSchedulerJobAction(fileContent);
     }
 
     return [];

@@ -303,6 +303,18 @@
                     }
                 ]
             }
+        },
+        {
+            "extension": ".hdbschedulerjob",
+            "target": "jobAction",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Job action must reference a package-qualified procedure (contains ::)",
+                        "pattern": "::"
+                    }
+                ]
+            }
         }
     ]
 }
