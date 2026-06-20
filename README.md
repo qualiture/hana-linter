@@ -52,7 +52,7 @@ Content-based linting uses [Chevrotain](https://chevrotain.io)-powered lexers an
 | `.hdbview`                | Chevrotain lexer + CST | ✅ Migrated            |
 | `.hdbprocedure`           | Chevrotain lexer + CST | ✅ Migrated            |
 | `.hdbfunction`            | Chevrotain lexer + CST | ✅ Migrated            |
-| `.hdbtabletype`           | —                      | ❌ Not yet implemented |
+| `.hdbtabletype`           | Chevrotain lexer + CST | ✅ Migrated            |
 | `.hdbcalculationview`     | —                      | ❌ Not yet implemented |
 | `.hdbanalyticalprivilege` | —                      | ❌ Not yet implemented |
 | `.hdbrole`                | —                      | ❌ Not yet implemented |
@@ -181,6 +181,7 @@ Supported extractors in this version:
 | ----------------- | -------------------- | ---------------------------------------------- |
 | `field`           | `.hdbtable`          | Column names                                   |
 | `field`           | `.hdbview`           | Column aliases (explicit list or `AS` aliases) |
+| `field`           | `.hdbtabletype`      | Column names                                   |
 | `inputParameter`  | `.hdbprocedure`      | `IN` and `INOUT` parameters                    |
 | `inputParameter`  | `.hdbfunction`       | `IN` parameters (functions accept `IN` only)   |
 | `outputParameter` | `.hdbprocedure`      | `OUT` and `INOUT` parameters                   |
@@ -313,6 +314,43 @@ jobs:
 			- run: npm ci
 			- run: npx hana-linter
 ```
+
+## Pre-commit Hook (husky + lint-staged)
+
+hana-linter's file-list mode (passing files as arguments) integrates cleanly with [lint-staged](https://github.com/lint-staged/lint-staged): lint-staged appends each staged file that matches the glob to the command, so only the files you are about to commit are linted.
+
+**1. Install the tools**
+
+```bash
+npm install --save-dev husky lint-staged
+npx husky init
+```
+
+**2. Configure lint-staged**
+
+Add a `lint-staged` key to `package.json`:
+
+```json
+{
+    "lint-staged": {
+        "*.{hdbtable,hdbview,hdbprocedure,hdbfunction,hdbtabletype}": "hana-linter"
+    }
+}
+```
+
+lint-staged turns this into `hana-linter <file1> <file2> …` for every staged file that matches the glob, which is exactly the file-list mode hana-linter supports.
+
+**3. Wire the pre-commit hook**
+
+Replace the contents of `.husky/pre-commit` with:
+
+```bash
+npx lint-staged
+```
+
+Now, every `git commit` will automatically run hana-linter against the staged HANA artifact files. If any naming violations are found, the commit is blocked and the issues are reported in the terminal.
+
+> **Tip:** Add `hana-linter` to `dependencies` (not `devDependencies`) if the linter also runs in production CI, so it is available after a plain `npm ci --production` install. For pre-commit-only use, `devDependencies` is fine.
 
 ## Requirements
 

@@ -6,6 +6,7 @@ import { extractTableColumns } from './parsers/hdbtable/index';
 import { extractViewColumns } from './parsers/hdbview/index';
 import { extractProcedureParameters } from './parsers/hdbprocedure/index';
 import { extractFunctionParameters } from './parsers/hdbfunction/index';
+import { extractTableTypeColumns } from './parsers/hdbtabletype/index';
 
 /**
  * Run content-based naming lint for a file.
@@ -67,6 +68,10 @@ function extractSubjects(extension: string, fileContent: string): ExtractedSubje
 
     if (extension === '.hdbfunction') {
         return extractFunctionParameters(fileContent);
+    }
+
+    if (extension === '.hdbtabletype') {
+        return extractTableTypeColumns(fileContent);
     }
 
     return [];
