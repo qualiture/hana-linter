@@ -11,6 +11,7 @@ import { extractRoleNames } from './parsers/hdbrole/index';
 import { extractCalculationViewOutputs } from './parsers/hdbcalculationview/index';
 import { extractSequenceName } from './parsers/hdbsequence/index';
 import { extractSchedulerJobAction } from './parsers/hdbschedulerjob/index';
+import { extractIndexName } from './parsers/hdbindex/index';
 
 /**
  * Run content-based naming lint for a file.
@@ -92,6 +93,10 @@ function extractSubjects(extension: string, fileContent: string): ExtractedSubje
 
     if (extension === '.hdbschedulerjob') {
         return extractSchedulerJobAction(fileContent);
+    }
+
+    if (extension === '.hdbindex') {
+        return extractIndexName(fileContent);
     }
 
     return [];

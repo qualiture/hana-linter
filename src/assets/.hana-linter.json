@@ -315,6 +315,18 @@
                     }
                 ]
             }
+        },
+        {
+            "extension": ".hdbindex",
+            "target": "indexName",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Index names in uppercase snake case",
+                        "pattern": "^[A-Z0-9]+(?:_[A-Z0-9]+)*$"
+                    }
+                ]
+            }
         }
     ]
 }

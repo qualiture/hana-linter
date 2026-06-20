@@ -40,7 +40,15 @@ export type JsonExtensionRuleSet = {
     readonly groups: JsonRuleGroup;
 };
 
-export type ContentTarget = 'field' | 'inputParameter' | 'outputParameter' | 'roleName' | 'grantedRoleName' | 'sequenceName' | 'jobAction';
+export type ContentTarget =
+    | 'field'
+    | 'inputParameter'
+    | 'outputParameter'
+    | 'roleName'
+    | 'grantedRoleName'
+    | 'sequenceName'
+    | 'jobAction'
+    | 'indexName';
 
 export type JsonContentRuleSet = {
     /**
