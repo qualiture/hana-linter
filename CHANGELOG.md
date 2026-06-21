@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+### 1.3.0
+
+- Added Chevrotain-based `.hdbtrigger` parser; content-linting of trigger names is now fully supported
+- The `.hdbtrigger` parser extracts the trigger name from `CREATE TRIGGER … ON …` DDL, handling all HANA timing/event variants (`BEFORE`, `AFTER`, `INSTEAD OF`), `INSERT`, `UPDATE [OF …]`, and `DELETE` events, `REFERENCING` clauses, `FOR EACH ROW|STATEMENT`, `WHEN (…)` clauses, and nested `BEGIN … END` bodies — all without false-positive extractions from body content
+- Trigger names may be schema-qualified (`schema.triggerName`); the parser correctly extracts only the unqualified name
+- Added `triggerName` as a valid `target` in content rule sets (configuration key: `triggerName`)
+- Default config (`.hana-linter.json`) now includes a `triggerName` rule set enforcing uppercase snake case for `.hdbtrigger` files
+
+---
+
 ### 1.1.0
 
 - Console output is now grouped by file, then by failed rule, reducing noise when multiple violations exist in the same file
