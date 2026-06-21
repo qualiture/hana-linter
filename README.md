@@ -40,7 +40,7 @@ Rule groups per extension:
 
 You can define `extension: "*"` as a shared rule set. Its rules are applied to every file extension and are merged with any extension-specific rule set.
 
-Content-based linting uses purpose-built parsers to reliably extract identifiers from HANA artifact files. SQL DDL artifact types (`.hdbtable`, `.hdbview`, `.hdbprocedure`, `.hdbfunction`, `.hdbtabletype`, `.hdbrole`) use [Chevrotain](https://chevrotain.io)-powered lexers and CST parsers that correctly handle block and line comments, multi-line definitions, quoted identifiers, and HANA-specific DDL constructs. The XML-based `.hdbcalculationview` format uses [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser) to navigate the logical model tree — without the false positives and false negatives that ad-hoc regex scanning produces.
+Content-based linting uses purpose-built parsers to reliably extract identifiers from HANA artifact files. SQL DDL artifact types (`.hdbtable`, `.hdbview`, `.hdbprocedure`, `.hdbfunction`, `.hdbtabletype`, `.hdbrole`, `.hdbsequence`, `.hdbindex`, `.hdbtrigger`) use [Chevrotain](https://chevrotain.io)-powered lexers and CST parsers that correctly handle block and line comments, multi-line definitions, quoted identifiers, and HANA-specific DDL constructs. The JSON-like `.hdbschedulerjob` format is also parsed with Chevrotain, tolerating C-style comments (`//` and `/* … */`) and trailing commas that standard `JSON.parse()` rejects. The XML-based `.hdbcalculationview` format uses [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser) to navigate the logical model tree — without the false positives and false negatives that ad-hoc regex scanning produces.
 
 ## Parser Status
 
@@ -56,14 +56,14 @@ Content-based linting uses purpose-built parsers to reliably extract identifiers
 | `.hdbrole`                | Chevrotain lexer + CST | ✅ Migrated            |
 | `.hdbcalculationview`     | fast-xml-parser (XML)  | ✅ Migrated            |
 | `.hdbanalyticalprivilege` | —                      | ❌ Not yet implemented |
-| `.hdbsequence`            | —                      | ❌ Not yet implemented |
+| `.hdbsequence`            | Chevrotain lexer + CST | ✅ Migrated            |
 | `.hdbconstraint`          | —                      | ❌ Not yet implemented |
-| `.hdbschedulerjob`        | —                      | ❌ Not yet implemented |
-| `.hdbindex`               | —                      | ❌ Not yet implemented |
-| `.hdbtrigger`             | —                      | ❌ Not yet implemented |
+| `.hdbschedulerjob`        | Chevrotain lexer + CST | ✅ Migrated            |
+| `.hdbindex`               | Chevrotain lexer + CST | ✅ Migrated            |
+| `.hdbtrigger`             | Chevrotain lexer + CST | ✅ Migrated            |
 
-- The regex **file name** validations for all of the above listed extensions **are implemented**. The **content extractor** hasn't been implemented everywhere yet.
-- **Not implemented**: `contentRuleSets` targeting these extensions will silently return no results — no identifiers are extracted and no content issues are raised.
+- The regex **file name** validations for all of the above listed extensions **are implemented**.
+- **Not implemented**: `contentRuleSets` targeting `.hdbanalyticalprivilege` or `.hdbconstraint` will silently return no results — no identifiers are extracted and no content issues are raised.
 
 ## Install
 
@@ -172,7 +172,7 @@ When `folderName` is omitted, no folder-location enforcement is applied.
 Each `contentRuleSets` item contains:
 
 - `extension` (string): target extension, for example `.hdbtable`; use `*` to target all extensions
-- `target` (string): extracted identifier type to validate; one of `field`, `inputParameter`, `outputParameter`
+- `target` (string): extracted identifier type to validate; one of `field`, `inputParameter`, `outputParameter`, `roleName`, `grantedRoleName`, `sequenceName`, `jobAction`, `indexName`, `triggerName`
 - `groups.all` (optional array): all rules must match
 - `groups.any` (optional array): at least one rule must match
 
@@ -190,6 +190,10 @@ Supported extractors in this version:
 | `grantedRoleName` | `.hdbrole`            | Each role listed in `extends roles { ... }`                                   |
 | `field`           | `.hdbcalculationview` | Output attributes, calculated attributes, base/calculated/restricted measures |
 | `inputParameter`  | `.hdbcalculationview` | Input parameters (`variable[@parameter="true"]`)                              |
+| `sequenceName`    | `.hdbsequence`        | The sequence name declared in the file                                        |
+| `jobAction`       | `.hdbschedulerjob`    | The procedure/function reference in the `action` field                        |
+| `indexName`       | `.hdbindex`           | The index name declared in the file                                           |
+| `triggerName`     | `.hdbtrigger`         | The trigger name declared in the file                                         |
 
 ### Default Config Example
 
@@ -347,6 +351,54 @@ Supported extractors in this version:
                     {
                         "description": "Input parameters prefixed with IP_",
                         "pattern": "^IP_[A-Z0-9_]+$"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbsequence",
+            "target": "sequenceName",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Sequence names in uppercase snake case",
+                        "pattern": "^[A-Z0-9]+(?:_[A-Z0-9]+)*$"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbschedulerjob",
+            "target": "jobAction",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Job action must reference a package-qualified procedure (contains ::)",
+                        "pattern": "::"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbindex",
+            "target": "indexName",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Index names in uppercase snake case",
+                        "pattern": "^[A-Z0-9]+(?:_[A-Z0-9]+)*$"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbtrigger",
+            "target": "triggerName",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Trigger names in uppercase snake case",
+                        "pattern": "^[A-Z0-9]+(?:_[A-Z0-9]+)*$"
                     }
                 ]
             }

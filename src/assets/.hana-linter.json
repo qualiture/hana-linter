@@ -291,6 +291,54 @@
                     }
                 ]
             }
+        },
+        {
+            "extension": ".hdbsequence",
+            "target": "sequenceName",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Sequence names in uppercase snake case",
+                        "pattern": "^[A-Z0-9]+(?:_[A-Z0-9]+)*$"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbschedulerjob",
+            "target": "jobAction",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Job action must reference a package-qualified procedure (contains ::)",
+                        "pattern": "::"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbindex",
+            "target": "indexName",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Index names in uppercase snake case",
+                        "pattern": "^[A-Z0-9]+(?:_[A-Z0-9]+)*$"
+                    }
+                ]
+            }
+        },
+        {
+            "extension": ".hdbtrigger",
+            "target": "triggerName",
+            "groups": {
+                "all": [
+                    {
+                        "description": "Trigger names in uppercase snake case",
+                        "pattern": "^[A-Z0-9]+(?:_[A-Z0-9]+)*$"
+                    }
+                ]
+            }
         }
     ]
 }

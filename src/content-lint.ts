@@ -9,6 +9,10 @@ import { extractFunctionParameters } from './parsers/hdbfunction/index';
 import { extractTableTypeColumns } from './parsers/hdbtabletype/index';
 import { extractRoleNames } from './parsers/hdbrole/index';
 import { extractCalculationViewOutputs } from './parsers/hdbcalculationview/index';
+import { extractSequenceName } from './parsers/hdbsequence/index';
+import { extractSchedulerJobAction } from './parsers/hdbschedulerjob/index';
+import { extractIndexName } from './parsers/hdbindex/index';
+import { extractTriggerName } from './parsers/hdbtrigger/index';
 
 /**
  * Run content-based naming lint for a file.
@@ -82,6 +86,22 @@ function extractSubjects(extension: string, fileContent: string): ExtractedSubje
 
     if (extension === '.hdbcalculationview') {
         return extractCalculationViewOutputs(fileContent);
+    }
+
+    if (extension === '.hdbsequence') {
+        return extractSequenceName(fileContent);
+    }
+
+    if (extension === '.hdbschedulerjob') {
+        return extractSchedulerJobAction(fileContent);
+    }
+
+    if (extension === '.hdbindex') {
+        return extractIndexName(fileContent);
+    }
+
+    if (extension === '.hdbtrigger') {
+        return extractTriggerName(fileContent);
     }
 
     return [];

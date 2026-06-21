@@ -10,7 +10,17 @@ export type LintIssue = {
     readonly filePath: string;
     readonly artifactName: string;
     readonly extension: string;
-    readonly subjectType?: 'artifact' | 'field' | 'inputParameter' | 'outputParameter' | 'roleName' | 'grantedRoleName';
+    readonly subjectType?:
+        | 'artifact'
+        | 'field'
+        | 'inputParameter'
+        | 'outputParameter'
+        | 'roleName'
+        | 'grantedRoleName'
+        | 'sequenceName'
+        | 'jobAction'
+        | 'indexName'
+        | 'triggerName';
     readonly subjectName?: string;
     readonly lineNumber?: number;
     readonly failedRuleDescription: string;
