@@ -230,7 +230,17 @@ function isJsonLintConfig(value: unknown): value is JsonLintConfig {
 }
 
 function isContentTarget(target: unknown): target is ContentTarget {
-    return target === 'field' || target === 'inputParameter' || target === 'outputParameter';
+    return (
+        target === 'field' ||
+        target === 'inputParameter' ||
+        target === 'outputParameter' ||
+        target === 'roleName' ||
+        target === 'grantedRoleName' ||
+        target === 'sequenceName' ||
+        target === 'jobAction' ||
+        target === 'indexName' ||
+        target === 'triggerName'
+    );
 }
 
 function compileRuleGroup(groups: { all?: readonly JsonRuleDefinition[]; any?: readonly JsonRuleDefinition[] }, contextRoot: string): RuleGroup {

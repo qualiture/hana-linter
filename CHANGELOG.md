@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+### 1.4.0
+
+- Bumped package version metadata to `1.4.0` (`package.json` and `package-lock.json`)
+
+---
+
 ### 1.3.0
 
 - Added Chevrotain-based `.hdbtrigger` parser; content-linting of trigger names is now fully supported
